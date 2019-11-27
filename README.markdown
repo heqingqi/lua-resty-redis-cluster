@@ -1,3 +1,10 @@
+Install
+=======
+	1、make
+	2、make install
+
+	默认openresty安装目录为/usr/local/openresty，如果需要修改其他目录，修改Makefile
+
 使用方法
 =======
 	local config = {
