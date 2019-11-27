@@ -1,5 +1,6 @@
 使用方法
-         local config = {
+=======
+	local config = {
               name = "缓存名称",
             --授权密码；如果没有redis没有授权密码，就空
             auth = "密码",
@@ -28,5 +29,6 @@
              ngx.say("failed to get dog: ", err)
              return
         end
-        
         ngx.say(results)
+
+
