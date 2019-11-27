@@ -130,12 +130,19 @@ local slot_cache = {}
 
 function _M.fetch_slots(self)
     local serv_list = self.config.serv_list
+    local red_auth_pwd = self.config.auth
     local red = redis:new()
     for i=1,#serv_list do
         local ip = serv_list[i].ip
         local port = serv_list[i].port
         local ok, err = red:connect(ip_string(ip), port)
         if ok then
+            if red_auth_pwd then
+                ok, err = red:auth(red_auth_pwd)
+                if not ok then
+                   ngx.log(ngx.INFO, "redis auth error" .. err) 
+                end
+            end
             local slot_info, err = red:cluster("slots")
             if slot_info then
                 local slots = {}
@@ -203,6 +210,7 @@ local function _do_cmd(self, cmd, key, ...)
     local slot = redis_slot(key)
 
     for k=1, MAGIC_TRY do
+        local red_auth_pwd = self.config.auth;
         local slots = slot_cache[self.config.name]
         local serv_list = slots[slot].serv_list
         local index =slots[slot].cur
@@ -212,6 +220,12 @@ local function _do_cmd(self, cmd, key, ...)
             local redis_client = redis:new()
             local ok, err = redis_client:connect(ip_string(ip), port)
             if ok then
+                if red_auth_pwd then
+                    ok, err = redis_client:auth(red_auth_pwd)
+                    if not ok then
+                        ngx.log(ngx.INFO, "redis auth error" .. err) 
+                    end
+                end
                 slots[slot].cur = index
                 local res, err = redis_client[cmd](redis_client, key, ...)
                 redis_client:set_keepalive(config.keepalive_timeout or DEFUALT_KEEPALIVE_TIMEOUT,
@@ -276,6 +290,12 @@ function _M.commit_pipeline(self)
         local ok, err = ins:connect(ip_string(ip), port)
 
         if ok then
+            if config.red_auth_pwd then
+                    ok, err = ins:auth(config.red_auth_pwd)
+                    if not ok then
+                        ngx.log(ngx.INFO, "redis auth error" .. err) 
+                    end
+            end
             ins:init_pipeline()
             for i=1,#ins_reqs do
                 local req = ins_reqs[i]
