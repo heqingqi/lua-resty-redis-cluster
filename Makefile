@@ -1,8 +1,7 @@
 OPENRESTY_PREFIX=/usr/local/openresty
 
-PREFIX ?=          /usr/local
-LUA_INCLUDE_DIR ?= $(PREFIX)/include
-LUA_LIB_DIR ?=     $(PREFIX)/lib/lua/$(LUA_VERSION)
+LUA_INCLUDE_DIR ?= $(OPENRESTY_PREFIX)/include
+LUA_LIB_DIR ?=     $(OPENRESTY_PREFIX)/lualib
 INSTALL ?= install
 
 CMPFLAG       = -c -fPIC
@@ -21,9 +20,9 @@ lib/libredis_slot.so:lib/redis_slot.o
 	$(CC) $(LINKFLAG) -o $@ $^
 
 install: all
-	$(INSTALL) -d $(DESTDIR)/$(LUA_LIB_DIR)/resty
-	$(INSTALL) lib/resty/*.lua $(DESTDIR)/$(LUA_LIB_DIR)/resty
-	$(INSTALL) lib/libredis_slot.so $(DESTDIR)/$(LUA_LIB_DIR)/libredis_slot.so
+	$(INSTALL) -d $(LUA_LIB_DIR)/resty
+	$(INSTALL) lib/resty/*.lua $(LUA_LIB_DIR)/resty
+	$(INSTALL) lib/libredis_slot.so $(LUA_LIB_DIR)/libredis_slot.so
 
 test: all
 	PATH=$(OPENRESTY_PREFIX)/nginx/sbin:$$PATH prove -I../test-nginx/lib -r t
